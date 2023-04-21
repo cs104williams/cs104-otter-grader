@@ -98,7 +98,7 @@ class TestFile(ABC):
         ret += "<font color=\"#a03196\"><ul>"
         for tcr in self.test_case_results:
             if tcr.passed:
-                ret += f"<li>✅ {tcr.test_case.body[4:]}</li>"
+                ret += f"<li>✨ {tcr.test_case.body[4:]}</li>"
             else:
                 message = tcr.message
                 if "\nGot:\n" in message:
@@ -108,7 +108,7 @@ class TestFile(ABC):
                     output_index = message.index("\nException raised:\n")
                     #message = message[(output_index + len("\nException raised:\n")):]
                     message = message.strip().split('\n')[-1]
-                ret += f"<li>🐝 {tcr.test_case.body[4:]}<pre>{indent(message.strip(), '      ')}</pre></li>\n"
+                ret += f'<li>🐝 {tcr.test_case.body[4:]}<pre style="color:#a03196; font-family: monospace;">{indent(message.strip(), "      ")}</pre></li>\n'
 
         return ret + "</ul></font></strong>"
 
