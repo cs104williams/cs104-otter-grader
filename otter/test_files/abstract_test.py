@@ -98,7 +98,7 @@ class TestFile(ABC):
         ret += "<font color=\"#a03196\"><ul>"
         for tcr in self.test_case_results:
             if tcr.passed:
-                ret += f"<li>✨ {tcr.test_case.body[4:]}</li>"
+                ret += f"<li>✅ {tcr.test_case.body[4:]}</li>"
             else:
                 message = tcr.message
                 if "\nGot:\n" in message:
@@ -108,7 +108,7 @@ class TestFile(ABC):
                     output_index = message.index("\nException raised:\n")
                     #message = message[(output_index + len("\nException raised:\n")):]
                     message = message.strip().split('\n')[-1]
-                ret += f'<li>🐝 {tcr.test_case.body[4:]}<pre style="color:#a03196; font-family: monospace;">{indent(message.strip(), "      ")}</pre></li>\n'
+                ret += f'<li>❌ {tcr.test_case.body[4:]}<pre style="color:#a03196; font-family: monospace;">     is False because:\n{indent(message.strip(), "      ")}</pre></li>\n'
 
         return ret + "</ul></font></strong>"
 
@@ -137,7 +137,7 @@ class TestFile(ABC):
                         output_index = message.index("\nException raised:\n")
                         #message = message[(output_index + len("\nException raised:\n")):]
                         message = message.strip().split('\n')[-1]
-                    ret += f"\n🐝 {tcr.test_case.body[4:]}{indent(message.strip(), '      ')}\n"
+                    ret += f"\n❌ {tcr.test_case.body[4:]}     is False because: \n{indent(message.strip(), '      ')}\n"
                 
 #                 if tcr.passed and tcr.test_case.success_message is not None:
 #                     ret += f"<p><strong><pre style='display: inline;'>{tcr.test_case.name}</pre> message:</strong> {tcr.test_case.success_message}</p>"
@@ -278,7 +278,7 @@ class TestFile(ABC):
                 elif "\nException raised:\n" in message:
                     output_index = message.index("\nException raised:\n")
                     message = message.strip().split('\n')[-1]
-                smry = f"\u001b[35;1m❌ {tcr.test_case.body[4:]}{indent(message.strip(), '      ')}\u001b[0m"
+                smry = f"\u001b[35;1m❌ {tcr.test_case.body[4:]}     is False because:\n {indent(message.strip(), '      ')}\u001b[0m"
                 tcr_summaries.append(smry.strip())
 
         return f"\u001b[1m{self.name} results:\u001b[0m\n" + indent("\n\n".join(tcr_summaries), "    ")
