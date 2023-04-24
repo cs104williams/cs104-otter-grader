@@ -340,7 +340,7 @@ class GradingResults:
         Returns:
             ``str``: the summary of results
         """
-        return "\n\n".join(tf.summary(public_only=public_only) for _, tf in self.results.items())
+        return "\n\n".join(tf.summary(public_only=public_only) for _, tf in self.results.items()) + "\n"
 
     def to_gradescope_dict(self, ag_config):
         """
