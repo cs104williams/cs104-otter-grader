@@ -14,11 +14,11 @@ with open("requirements.txt") as f:
 	install_requires = f.readlines()
 
 setuptools.setup(
-	name = "otter-grader",
+	name = "cs104-otter-grader",
 	version = version,
 	author = "Christopher Pyles",
 	author_email = "otter-grader@berkeley.edu",
-	description = "Python and Jupyter Notebook autograder",
+	description = "Python and Jupyter Notebook autograder.  CS 104 version!",
 	long_description = long_description,
 	long_description_content_type = "text/markdown",
 	url = "https://github.com/ucbds-infra/otter-grader",
