@@ -3,12 +3,14 @@
 import random
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass, replace
-from textwrap import indent
+from textwrap import indent, wrap
 from typing import Optional, Union
 
 
 OK_FORMAT_VARNAME = "OK_FORMAT"
 
+def indent_wrap(s):
+    return indent(s.strip(),"      ")
 
 # # class for storing the test cases themselves
 # #   - body is the string that gets run for the test
@@ -98,34 +100,44 @@ class TestFile(ABC):
         ret += '<font color=\"#a03196\"><ul style="list-style: none;">'
         for tcr in self.test_case_results:
             if tcr.passed:
-                ret += f"<li>✅ <samp>{tcr.test_case.body[4:]}<samp></li>"
+                if tcr.test_case.success_message is not None:
+                    ret += f"<li>✅ <samp>{tcr.test_case.success_message}<samp></li>"
+                else:
+                    ret += f"<li>✅ <samp>{tcr.test_case.body.split('>>> ')[-1]}<samp></li>"
             else:
-                message = tcr.message
-                if "\nGot:\n" in message:
-                    output_index = message.index("\nGot:\n")
-                    message = message[(output_index + len("\nGot:\n")):]
-                elif "\nException raised:\n" in message:
-                    output_index = message.index("\nException raised:\n")
-                    #message = message[(output_index + len("\nException raised:\n")):]
-                    message = message.strip().split('\n')[-1]
-                ret += f'<li>❌ <samp>{tcr.test_case.body[4:]}<samp><pre style="color:#a03196;">{indent(message.strip(), "      ")}</pre></li>\n'
-
+                if tcr.test_case.failure_message is not None:
+                    ret += f'<li>❌ <samp>Hmm...<samp><pre style="color:#a03196;">{indent_wrap(tcr.test_case.failure_message)}</pre></li>\n'
+                else:
+                    message = tcr.message
+                    if "\nGot:\n" in message:
+                        output_index = message.index("\nGot:\n")
+                        message = message[(output_index + len("\nGot:\n")):]
+                    elif "\nException raised:\n" in message:
+                        output_index = message.index("\nException raised:\n")
+                        message = message.strip().split('\n')[-1]
+                    ret += f'<li>❌ <samp>{tcr.test_case.body.split(">>> ")[-1]}<samp><pre style="color:#a03196;">{indent_wrap(message)}</pre></li>\n'
         return ret + "</ul></font></strong>"
 
     def __repr__(self):
         ret = "" # "\u001b[35m\u001b[1m\n"
         for tcr in self.test_case_results:
             if tcr.passed:
-                ret += f"✅ {tcr.test_case.body[4:]}"
+                if tcr.test_case.success_message is not None:
+                    ret += f"✅ {tcr.test_case.success_message}"
+                else:
+                    ret += f"✅ {tcr.test_case.body.split('>>> ')[-1]}"
             else:
-                message = tcr.message
-                if "\nGot:\n" in message:
-                    output_index = message.index("\nGot:\n")
-                    message = message[(output_index + len("\nGot:\n")):]
-                elif "\nException raised:\n" in message:
-                    output_index = message.index("\nException raised:\n")
-                    message = message.strip().split('\n')[-1]
-                ret += f"\n❌ {tcr.test_case.body[4:]}{indent(message.strip(), '      ')}\n"
+                if tcr.test_case.failure_message is not None:
+                    ret += f"\n❌ Hmm...\n{indent_wrap(tcr.test_case.failure_message.strip())}\n"
+                else:
+                    message = tcr.message
+                    if "\nGot:\n" in message:
+                        output_index = message.index("\nGot:\n")
+                        message = message[(output_index + len("\nGot:\n")):]
+                    elif "\nException raised:\n" in message:
+                        output_index = message.index("\nException raised:\n")
+                        message = message.strip().split('\n')[-1]
+                    ret += f"\n❌ {tcr.test_case.body.split('>>> ')[-1]}{indent_wrap(message.strip())}\n"
         return ret # + "\u001b[0m"
 
     # @abstractmethod
@@ -256,7 +268,7 @@ class TestFile(ABC):
                 elif "\nException raised:\n" in message:
                     output_index = message.index("\nException raised:\n")
                     message = message.strip().split('\n')[-1]
-                smry = f"\u001b[35m\u001b[1m❌ {tcr.test_case.body[4:]}{indent(message.strip(), '      ')}\u001b[0m"
+                smry = f"\u001b[35m\u001b[1m❌ {tcr.test_case.body.split('>>> ')[-1]}{indent(message.strip(), '      ')}\u001b[0m"
                 tcr_summaries.append(smry.strip())
 
         return f"\u001b[1m{self.name} results:\u001b[0m\n" + indent("\n\n".join(tcr_summaries), "    ")
