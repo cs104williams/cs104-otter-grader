@@ -258,14 +258,17 @@ class TestFile(ABC):
         tcr_summaries = []
         for tcr in tcrs:
             if not tcr.passed:
-                message = tcr.message
-                if "\nGot:\n" in message:
-                    output_index = message.index("\nGot:\n")
-                    message = message[(output_index + len("\nGot:\n")):]
-                elif "\nException raised:\n" in message:
-                    output_index = message.index("\nException raised:\n")
-                    message = message.strip().split('\n')[-1]
-                smry = f"\u001b[35m\u001b[1m❌ {tcr.test_case.default_message()}{indent_wrap(message.strip())}\u001b[0m"
+                if tcr.test_case.failure_message is not None:
+                    smry = f'\u001b[35m\u001b[1m❌ {tcr.test_case.failure_message}\u001b[0m'
+                else:
+                    message = tcr.message
+                    if "\nGot:\n" in message:
+                        output_index = message.index("\nGot:\n")
+                        message = message[(output_index + len("\nGot:\n")):]
+                    elif "\nException raised:\n" in message:
+                        output_index = message.index("\nException raised:\n")
+                        message = message.strip().split('\n')[-1]
+                    smry = f"\u001b[35m\u001b[1m❌ {tcr.test_case.default_message()}{indent_wrap(message.strip())}\u001b[0m"
                 tcr_summaries.append(smry.strip())
 
         return f"\u001b[1m{self.name} results:\u001b[0m\n" + indent("\n\n".join(tcr_summaries), "    ")
