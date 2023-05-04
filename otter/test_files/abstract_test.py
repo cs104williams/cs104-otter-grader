@@ -6,7 +6,6 @@ from dataclasses import asdict, dataclass, replace
 from textwrap import indent, wrap
 from typing import Optional, Union
 
-
 OK_FORMAT_VARNAME = "OK_FORMAT"
 
 def indent_wrap(s):
@@ -32,6 +31,9 @@ class TestCase:
     success_message: Optional[str]
 
     failure_message: Optional[str]
+
+    def default_message(self):
+        return self.body.split(">>> ")[-1]
 
 
 @dataclass
@@ -101,12 +103,12 @@ class TestFile(ABC):
         for tcr in self.test_case_results:
             if tcr.passed:
                 if tcr.test_case.success_message is not None:
-                    ret += f"<li>✅ <samp>{tcr.test_case.success_message}<samp></li>"
+                    ret += f'<li>✅ <samp>{tcr.test_case.success_message}</samp></li>'
                 else:
-                    ret += f"<li>✅ <samp>{tcr.test_case.body.split('>>> ')[-1]}<samp></li>"
+                    ret += f'<li>✅ <samp>{tcr.test_case.default_message()}</samp></li>'
             else:
                 if tcr.test_case.failure_message is not None:
-                    ret += f'<li>❌ <samp>Hmm...<samp><pre style="color:#a03196;">{indent_wrap(tcr.test_case.failure_message)}</pre></li>\n'
+                    ret += f'<li>❌ <samp>{tcr.test_case.failure_message}</samp></li>'
                 else:
                     message = tcr.message
                     if "\nGot:\n" in message:
@@ -115,20 +117,20 @@ class TestFile(ABC):
                     elif "\nException raised:\n" in message:
                         output_index = message.index("\nException raised:\n")
                         message = message.strip().split('\n')[-1]
-                    ret += f'<li>❌ <samp>{tcr.test_case.body.split(">>> ")[-1]}<samp><pre style="color:#a03196;">{indent_wrap(message)}</pre></li>\n'
+                    ret += f'<li>❌ <samp>{tcr.test_case.default_message()}<samp><pre style="color:#a03196;">{indent_wrap(message)}</pre></li>\n'
         return ret + "</ul></font></strong>"
 
     def __repr__(self):
-        ret = "" # "\u001b[35m\u001b[1m\n"
+        ret = "" 
         for tcr in self.test_case_results:
             if tcr.passed:
                 if tcr.test_case.success_message is not None:
                     ret += f"✅ {tcr.test_case.success_message}"
                 else:
-                    ret += f"✅ {tcr.test_case.body.split('>>> ')[-1]}"
+                    ret += f"✅ {tcr.test_case.default_message()}"
             else:
                 if tcr.test_case.failure_message is not None:
-                    ret += f"\n❌ Hmm...\n{indent_wrap(tcr.test_case.failure_message.strip())}\n"
+                    ret += f"\n❌ {tcr.test_case.failure_message.strip()}\n"
                 else:
                     message = tcr.message
                     if "\nGot:\n" in message:
@@ -137,8 +139,8 @@ class TestFile(ABC):
                     elif "\nException raised:\n" in message:
                         output_index = message.index("\nException raised:\n")
                         message = message.strip().split('\n')[-1]
-                    ret += f"\n❌ {tcr.test_case.body.split('>>> ')[-1]}{indent_wrap(message.strip())}\n"
-        return ret # + "\u001b[0m"
+                    ret += f"\n❌ {tcr.test_case.default_message()}{indent_wrap(message.strip())}\n"
+        return ret
 
     # @abstractmethod
     def __init__(self, name, path, test_cases, all_or_nothing=True):
@@ -247,11 +249,6 @@ class TestFile(ABC):
     def summary(self, public_only=False):
         if (not public_only and self.passed_all) or (public_only and self.passed_all_public):
             ret = f"\u001b[1m{self.name} results:\n    ✅ All test cases passed!\u001b[0m"
-            if (not public_only and self.passed_all) and \
-                    any(tcr.test_case.success_message is not None for tcr in self.test_case_results):
-                for tcr in self.test_case_results:
-                    if tcr.test_case.success_message is not None:
-                        ret += f"\n{tcr.test_case.name} message: {tcr.test_case.success_message}"
             return ret
 
         tcrs = self.test_case_results
@@ -268,7 +265,7 @@ class TestFile(ABC):
                 elif "\nException raised:\n" in message:
                     output_index = message.index("\nException raised:\n")
                     message = message.strip().split('\n')[-1]
-                smry = f"\u001b[35m\u001b[1m❌ {tcr.test_case.body.split('>>> ')[-1]}{indent(message.strip(), '      ')}\u001b[0m"
+                smry = f"\u001b[35m\u001b[1m❌ {tcr.test_case.default_message()}{indent_wrap(message.strip())}\u001b[0m"
                 tcr_summaries.append(smry.strip())
 
         return f"\u001b[1m{self.name} results:\u001b[0m\n" + indent("\n\n".join(tcr_summaries), "    ")
