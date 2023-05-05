@@ -52,6 +52,9 @@ class TestCase:
     hidden: bool
     """whether the test case is hidden"""
 
+    submit_only: bool
+    """whether the test case is run only upon submission"""
+
     points: Optional[Union[int, float]]
     """the point value of the test case"""
 
@@ -148,7 +151,12 @@ class AssignmentTestsManager:
         else:
             hidden = False
 
-        test_start_line = 0 if hidden else -1
+        if source[0].lstrip().startswith("#"):
+            submit_only = bool(re.search(r"\bsubmit_only\b", source[0], flags=re.IGNORECASE))
+        else:
+            submit_only = False
+
+        test_start_line = 0 if hidden or submit_only else -1
 
         output = ''
         for o in cell['outputs']:
@@ -163,6 +171,7 @@ class AssignmentTestsManager:
         test_start_line = maybe_test_start_line if maybe_test_start_line is not None else test_start_line
 
         hidden = config.get("hidden", hidden)
+        submit_only = config.get("submit_only", submit_only)
         points = config.get("points", None)
         success_message = config.get("success_message", None)
         failure_message = config.get("failure_message", None)
@@ -171,7 +180,7 @@ class AssignmentTestsManager:
 
         self._add_test_case(
             question,
-            TestCase(test_source, output, hidden, points, success_message, failure_message),
+            TestCase(test_source, output, hidden, submit_only, points, success_message, failure_message),
         )
 
     def has_tests(self, question):
@@ -256,6 +265,7 @@ class AssignmentTestsManager:
         ret = {
             'code': '\n'.join(code_lines),
             'hidden': test_case.hidden,
+            'submit_only': test_case.submit_only,
             'locked': False,
         }
 
@@ -343,10 +353,10 @@ class AssignmentTestsManager:
             test_path = os.path.join(test_dir, test_name + test_ext)
 
             if not include_hidden:
-                test_info["test_cases"] = [tc for tc in test_info["test_cases"] if not tc.hidden]
+                test_info["test_cases"] = [tc for tc in test_info["test_cases"] if not tc.hidden and not tc.submit_only]
                 if isinstance(test_info["points"], list):
                     test_info["points"] = [p for tc, p in \
-                        zip(test_info["test_cases"], test_info["points"]) if not tc.hidden]
+                        zip(test_info["test_cases"], test_info["points"]) if not tc.hidden and not tc.submit_only]
 
             test = \
                 self._format_test(test_info["name"], test_info["points"], test_info["test_cases"])

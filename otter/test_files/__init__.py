@@ -361,7 +361,7 @@ class GradingResults:
             # TODO: use output to display public test case results?
 
         # hidden visibility determined by show_hidden
-        hidden_test_visibility = ("hidden", ("after_published", "visible")[ag_config.show_hidden_before_published])[ag_config.show_hidden]
+        hidden_test_visibility = ("hidden", "after_published")[ag_config.show_hidden]
 
         # if show_all_public is true and all tests are public tests, display all tests in results
         if ag_config.show_all_public and all(tf.all_public for tf in self.results.values()):
@@ -418,7 +418,7 @@ class GradingResults:
                 else:
                     output["score"] = 0
 
-        if self.all_hidden and not ag_config.show_hidden_before_published:
+        if self.all_hidden:
             for test in output["tests"]:
                 test["visibility"]  = "hidden"
             output["stdout_visibility"] = "hidden"

@@ -130,7 +130,7 @@ class OKTestFile(TestFile):
         test_cases = []
         for i, test_case in enumerate(test_spec['suites'][0]['cases']):
             test_cases.append(TestCase(
-                name = test_case.get('name', f"{test_spec['name']} - {i + 1}"),
+                name = test_case.get('name', f"{test_spec['name']}.{i + 1}:"),
                 body = dedent(test_case['code']), 
                 hidden = test_case.get('hidden', True),
                 points = test_case.get('points', None),
