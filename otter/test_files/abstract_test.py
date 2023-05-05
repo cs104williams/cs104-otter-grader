@@ -74,7 +74,7 @@ class TestFile(ABC):
         test_case_results (``list`` of ``TestCaseResult``): a list of results for the test cases in
             ``test_cases``
     """
-    
+
     def _repr_html_(self):
         ret = f"<strong><p><pre style='display: inline;'>{self.name}</pre> results:</p>"
         ret += '<font color=\"#a03196\"><ul style="list-style: none;">'
@@ -226,7 +226,7 @@ class TestFile(ABC):
     
     def summary(self, public_only=False):
         if (not public_only and self.passed_all) or (public_only and self.passed_all_public):
-            ret = f"\u001b[1m{self.name} results:\n    ✅ All test cases passed!\u001b[0m"
+            ret = f"{self.name} results:\n    ✅ All test cases passed!"
             return ret
 
         tcrs = self.test_case_results
@@ -237,7 +237,7 @@ class TestFile(ABC):
         for tcr in tcrs:
             if not tcr.passed:
                 if tcr.test_case.failure_message is not None:
-                    smry = f'\u001b[35m\u001b[1m❌ {tcr.test_case.failure_message}\u001b[0m'
+                    smry = f'❌ {tcr.test_case.failure_message}'
                 else:
                     message = tcr.message
                     if "\nGot:\n" in message:
@@ -246,10 +246,10 @@ class TestFile(ABC):
                     elif "\nException raised:\n" in message:
                         output_index = message.index("\nException raised:\n")
                         message = message.strip().split('\n')[-1]
-                    smry = f"\u001b[35m\u001b[1m❌ {tcr.test_case.default_message()}{indent_wrap(message.strip())}\u001b[0m"
+                    smry = f"❌ {tcr.test_case.default_message()}{indent_wrap(message.strip())}"
                 tcr_summaries.append(smry.strip())
 
-        return f"\u001b[1m{self.name} results:\u001b[0m\n" + indent("\n\n".join(tcr_summaries), "    ")
+        return f"{self.name} results:\n" + indent("\n\n".join(tcr_summaries), "    ")
 
     @classmethod
     @abstractmethod
