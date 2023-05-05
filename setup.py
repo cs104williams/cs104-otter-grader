@@ -15,6 +15,9 @@ with open("requirements.txt") as f:
 
 setuptools.setup(
 	name = "otter-grader",
+        packages = ['otter'],
+        package_dir = { 'otter': 'otter' },
+	
 	version = version,
 	author = "Christopher Pyles",
 	author_email = "otter-grader@berkeley.edu",
