@@ -74,29 +74,7 @@ class TestFile(ABC):
         test_case_results (``list`` of ``TestCaseResult``): a list of results for the test cases in
             ``test_cases``
     """
-
-    # def _repr_html_(self):
-    #     if self.passed_all:
-    #         all_passed_emoji = random.choice(['🍀', '🎉', '🌈', '🙌', '🚀', '🌟', '✨', '💯'])
-    #         if any(tcr.test_case.success_message is not None for tcr in self.test_case_results):
-    #             ret = f"<p><strong><pre style='display: inline;'>{self.name}</pre></strong> passed! {all_passed_emoji}</p>"
-    #             for tcr in self.test_case_results:
-    #                 if tcr.test_case.success_message is not None:
-    #                     ret += f"<p><strong><pre style='display: inline;'>{tcr.test_case.name}</pre> message:</strong> {tcr.test_case.success_message}</p>"
-    #             return ret
-    #         return f"<p><strong><pre style='display: inline;'>{self.name}</pre></strong> passed! {all_passed_emoji}</p>"
-    #     else:
-    #         ret = f"<p><strong style='color: red;'><pre style='display: inline;'>{self.name}</pre> results:</strong></p>"
-    #         for tcr in self.test_case_results:
-    #             if tcr.passed and tcr.test_case.success_message is not None:
-    #                 ret += f"<p><strong><pre style='display: inline;'>{tcr.test_case.name}</pre> message:</strong> {tcr.test_case.success_message}</p>"
-    #             if not tcr.passed and tcr.test_case.failure_message is not None:
-    #                 ret += f"<p><strong><pre style='display: inline;'>{tcr.test_case.name}</pre> message:</strong> {tcr.test_case.failure_message}</p>"
-    #             ret += f"<p><strong><pre style='display: inline;'>{tcr.test_case.name}</pre> result:</strong></p>"
-    #             ret += f"<pre>{indent(tcr.message, '    ')}</pre>"
-
-    #         return ret
-
+    
     def _repr_html_(self):
         ret = f"<strong><p><pre style='display: inline;'>{self.name}</pre> results:</p>"
         ret += '<font color=\"#a03196\"><ul style="list-style: none;">'
@@ -272,36 +250,6 @@ class TestFile(ABC):
                 tcr_summaries.append(smry.strip())
 
         return f"\u001b[1m{self.name} results:\u001b[0m\n" + indent("\n\n".join(tcr_summaries), "    ")
-
-
-
-    # def summary(self, public_only=False):
-    #     if (not public_only and self.passed_all) or (public_only and self.passed_all_public):
-    #         ret = f"{self.name} results: All test cases passed!"
-    #         if (not public_only and self.passed_all) and \
-    #                 any(tcr.test_case.success_message is not None for tcr in self.test_case_results):
-    #             for tcr in self.test_case_results:
-    #                 if tcr.test_case.success_message is not None:
-    #                     ret += f"\n{tcr.test_case.name} message: {tcr.test_case.success_message}"
-    #         return ret
-
-    #     tcrs = self.test_case_results
-    #     if public_only:
-    #         tcrs = [tcr for tcr in tcrs if not tcr.test_case.hidden]
-
-    #     tcr_summaries = []
-    #     for tcr in tcrs:
-    #         smry = ""
-    #         if tcr.passed and tcr.test_case.success_message is not None:
-    #             smry += f"{tcr.test_case.name} message: {tcr.test_case.success_message}\n\n"
-    #         if not tcr.passed and tcr.test_case.failure_message is not None:
-    #             smry += f"{tcr.test_case.name} message: {tcr.test_case.failure_message}\n\n"
-    #         smry += f"{tcr.test_case.name} result:\n"
-    #         smry += f"{indent(tcr.message.strip(), '    ')}\n\n"
-
-    #         tcr_summaries.append(smry.strip())
-
-    #     return f"{self.name} results:\n" + indent("\n\n".join(tcr_summaries), "    ")
 
     @classmethod
     @abstractmethod

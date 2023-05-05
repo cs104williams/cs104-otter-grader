@@ -29,6 +29,11 @@ class AutograderConfig(fica.Config):
         default=False,
     )
 
+    show_hidden_before_published = fica.Key(
+        description="whether to show hidden test rules before grades are published",
+        default=False
+    )
+
     show_all_public = fica.Key(
         description="whether to display all test results if all tests are public tests",
         default=False,
