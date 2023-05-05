@@ -418,7 +418,7 @@ class GradingResults:
                 else:
                     output["score"] = 0
 
-        if self.all_hidden:
+        if self.all_hidden and not ag_config.show_hidden_before_published:
             for test in output["tests"]:
                 test["visibility"]  = "hidden"
             output["stdout_visibility"] = "hidden"
