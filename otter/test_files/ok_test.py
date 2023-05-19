@@ -147,8 +147,9 @@ class OKTestFile(TestFile):
 
         # grab whether the tests are all-or-nothing
         all_or_nothing = test_spec.get('all_or_nothing', True)
+        has_hidden = test_spec.get('has_hidden', False)
 
-        return cls(test_spec['name'], path, test_cases, all_or_nothing)
+        return cls(test_spec['name'], path, test_cases, all_or_nothing, has_hidden)
 
     @classmethod
     def from_file(cls, path):

@@ -3,13 +3,14 @@
 import random
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass, replace
-from textwrap import indent, wrap
+from textwrap import indent, wrap, dedent
 from typing import Optional, Union
+import re
 
 OK_FORMAT_VARNAME = "OK_FORMAT"
 
 def indent_wrap(s):
-    return indent(s.strip(),"      ")
+    return indent(dedent(s),"      ")
 
 # # class for storing the test cases themselves
 # #   - body is the string that gets run for the test
@@ -33,7 +34,12 @@ class TestCase:
     failure_message: Optional[str]
 
     def default_message(self):
-        return self.body.split(">>> ")[-1]
+        text = self.body.split(">>> ")[-1]
+        m = re.match(r"check\('(.*)', locals\(\)\)", text.strip())
+        if m:
+            return m.group(1).replace("\\'", "'")
+        else:
+            return text
 
 
 @dataclass
@@ -96,6 +102,8 @@ class TestFile(ABC):
                         output_index = message.index("\nException raised:\n")
                         message = message.strip().split('\n')[-1]
                     ret += f'<li>❌ <samp>{tcr.test_case.name} {tcr.test_case.default_message()}<samp><pre style="color:#a03196;">{indent_wrap(message)}</pre></li>\n'
+        if self.has_hidden:
+            ret += f'<li>🙀 <samp>This part has hidden tests -- check you answers carefully!</samp></li>'
         return ret + "</ul></font></strong>"
 
     def __repr__(self):
@@ -121,13 +129,14 @@ class TestFile(ABC):
         return ret
 
     # @abstractmethod
-    def __init__(self, name, path, test_cases, all_or_nothing=True):
+    def __init__(self, name, path, test_cases, all_or_nothing=True, has_hidden=False):
         self.name = name
         self.path = path
         self.test_cases = test_cases
         self.all_or_nothing = all_or_nothing
         self.test_case_results = []
         self._score = None
+        self.has_hidden = has_hidden
 
     @staticmethod
     def resolve_test_file_points(total_points, test_cases):
@@ -246,7 +255,7 @@ class TestFile(ABC):
                     elif "\nException raised:\n" in message:
                         output_index = message.index("\nException raised:\n")
                         message = message.strip().split('\n')[-1]
-                    smry = f"❌ {tcr.test_case.name} {tcr.test_case.default_message()}{indent_wrap(message.strip())}"
+                    smry = f"❌ {tcr.test_case.name} {tcr.test_case.default_message()}{indent_wrap(message)}"
                 tcr_summaries.append(smry.strip())
 
         return f"{self.name} results:\n" + indent("\n\n".join(tcr_summaries), "    ")

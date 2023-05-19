@@ -297,7 +297,7 @@ class AssignmentTestsManager:
             'type': 'doctest'
         }
 
-    def _format_test(self, name, points, test_cases) -> Union[str, Dict[str, Any]]:
+    def _format_test(self, name, points, test_cases, has_hidden) -> Union[str, Dict[str, Any]]:
         """
         Format the test cases for a question based on the assignment config.
 
@@ -315,6 +315,7 @@ class AssignmentTestsManager:
                 "name": name,
                 "points": points,
                 "suites": [self._create_ok_test_suite(test_cases)],
+                "has_hidden": has_hidden
             }
 
         else:
@@ -323,6 +324,7 @@ class AssignmentTestsManager:
                 "points": points, 
                 "test_cases": test_cases, 
                 "OK_FORMAT_VARNAME": OK_FORMAT_VARNAME,
+                "has_hidden": has_hidden
             }
             test = EXCEPTION_BASED_TEST_FILE_TEMPLATE.render(**template_kwargs)
 
@@ -351,6 +353,7 @@ class AssignmentTestsManager:
         for test_name in self._tests_by_question.keys():
             test_info = self._create_test_file_info(test_name)
             test_path = os.path.join(test_dir, test_name + test_ext)
+            has_hidden = any(tc.hidden for tc in test_info["test_cases"])
 
             if not include_hidden:
                 test_info["test_cases"] = [tc for tc in test_info["test_cases"] if not tc.hidden and not tc.submit_only]
@@ -359,7 +362,7 @@ class AssignmentTestsManager:
                         zip(test_info["test_cases"], test_info["points"]) if not tc.hidden and not tc.submit_only]
 
             test = \
-                self._format_test(test_info["name"], test_info["points"], test_info["test_cases"])
+                self._format_test(test_info["name"], test_info["points"], test_info["test_cases"], has_hidden)
 
             if self.assignment.tests.files or force_files:
                 with open(test_path, "w+") as f:
