@@ -35,7 +35,7 @@ class TestCase:
 
     def default_message(self):
         text = self.body.split(">>> ")[-1]
-        m = re.match(r"check\('(.*)', locals\(\)\)", text.strip())
+        m = re.match(r"check_str\('(.*)', locals\(\)\)", text.strip())
         if m:
             return m.group(1).replace("\\'", "'")
         else:
