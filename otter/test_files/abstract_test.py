@@ -35,11 +35,7 @@ class TestCase:
 
     def default_message(self):
         text = self.body.split(">>> ")[-1]
-        m = re.match(r"check_str\('(.*)', locals\(\)\)", text.strip())
-        if m:
-            return m.group(1).replace("\\'", "'")
-        else:
-            return text
+        return text
 
 
 @dataclass
@@ -84,15 +80,16 @@ class TestFile(ABC):
     def _repr_html_(self):
         ret = f"<strong><p><pre style='display: inline;'>{self.name}</pre> results:</p>"
         ret += '<font color=\"#a03196\"><ul style="list-style: none;">'
+        li_style = 'padding: 10px 0 0 0;'
         for tcr in self.test_case_results:
             if tcr.passed:
                 if tcr.test_case.success_message is not None:
-                    ret += f'<li>✅ <samp>{tcr.test_case.name} {tcr.test_case.success_message}</samp></li>'
+                    ret += f'<li style="{li_style}">✅ <samp>{tcr.test_case.name} {tcr.test_case.success_message}</samp></li>'
                 else:
-                    ret += f'<li>✅ <samp>{tcr.test_case.name} {tcr.test_case.default_message()}</samp></li>'
+                    ret += f'<li style="{li_style}">✅ <samp>{tcr.test_case.name} {tcr.test_case.default_message()}</samp></li>'
             else:
                 if tcr.test_case.failure_message is not None:
-                    ret += f'<li>❌ <samp>{tcr.test_case.name} {tcr.test_case.failure_message}</samp></li>'
+                    ret += f'<li style="{li_style}">❌ <samp>{tcr.test_case.name} {tcr.test_case.failure_message}</samp></li>'
                 else:
                     message = tcr.message
                     if "\nGot:\n" in message:
@@ -101,9 +98,9 @@ class TestFile(ABC):
                     elif "\nException raised:\n" in message:
                         output_index = message.index("\nException raised:\n")
                         message = message.strip().split('\n')[-1]
-                    ret += f'<li>❌ <samp>{tcr.test_case.name} {tcr.test_case.default_message()}<samp><pre style="color:#a03196;">{indent_wrap(message)}</pre></li>\n'
+                    ret += f'<li style="{li_style}">❌ <samp>{tcr.test_case.name} {tcr.test_case.default_message()}<samp><pre style="color:#a03196;">{indent_wrap(message)}</pre></li>\n'
         if self.has_hidden:
-            ret += f'<li>🙀 <samp>This part has hidden tests -- check you answers carefully!</samp></li>'
+            ret += f'<li style="{li_style}">🙀 <samp>This part has hidden tests -- check you answers carefully!</samp></li>'
         return ret + "</ul></font></strong>"
 
     def __repr__(self):
@@ -255,7 +252,7 @@ class TestFile(ABC):
                     elif "\nException raised:\n" in message:
                         output_index = message.index("\nException raised:\n")
                         message = message.strip().split('\n')[-1]
-                    smry = f"❌ {tcr.test_case.name} {tcr.test_case.default_message()}{indent_wrap(message)}"
+                    smry = f"❌ {tcr.test_case.name} {tcr.test_case.default_message()}\n{indent_wrap(message)}"
                 tcr_summaries.append(smry.strip())
 
         return f"{self.name} results:\n" + indent("\n\n".join(tcr_summaries), "    ")
