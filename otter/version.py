@@ -17,7 +17,7 @@ LOGO_WITH_VERSION = fr"""
 | |       | |     |  |        |  |     | ______|  |  |
 |  \_____/  |     |  |_       |  |_    | |_____   |  |
  \_________/       \ __|       \ __|    \______|  |__|
-                                                v{__version__}
+cs104                                           v{__version__}
 """[1:]  # remove beginning newline
 
 

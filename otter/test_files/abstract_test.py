@@ -108,9 +108,9 @@ class TestFile(ABC):
         for tcr in self.test_case_results:
             if tcr.passed:
                 if tcr.test_case.success_message is not None:
-                    ret += f"✅ {tcr.test_case.name} {tcr.test_case.success_message}"
+                    ret += f"✅ {tcr.test_case.name} {tcr.test_case.success_message}\n"
                 else:
-                    ret += f"✅ {tcr.test_case.name} {tcr.test_case.default_message()}"
+                    ret += f"✅ {tcr.test_case.name} {tcr.test_case.default_message()}\n"
             else:
                 if tcr.test_case.failure_message is not None:
                     ret += f"\n❌ {tcr.test_case.name} {tcr.test_case.failure_message.strip()}\n"
