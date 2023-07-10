@@ -1,5 +1,23 @@
 # Changelog
 
+**v4.4.1:**
+
+* Update Otter Grade to close file handles before copying files out of Docker containers to fix bug on Windows
+
+**v4.4.0:**
+
+* Moved `google-api-python-client`, `google-auth-oauthlib`, and `six` from required installation dependencies to test dependencies to allow installation of Otter with Mamba per [#633](https://github.com/ucbds-infra/otter-grader/issues/633)
+* Added question name to point value validation error messages per [#586](https://github.com/ucbds-infra/otter-grader/issues/586)
+* Fixed bug in copying plugin configurations from assignment config to `otter_config.json` in Otter Assign
+
+**v4.3.4:**
+
+* Set tests directory path when calling `ottr::run_autograder` from Otter Run
+
+**v.4.3.3:**
+
+* Fix Otter Assign slowdown due to poor-performance regex per [#634](https://github.com/ucbds-infra/otter-grader/issues/634)
+
 **v4.3.2:**
 
 * Fix bug in determining whether the active interpreter is Jupyterlite in `otter.Notebook` per [#511](https://github.com/ucbds-infra/otter-grader/issues/511#issuecomment-1500964637)
