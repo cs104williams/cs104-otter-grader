@@ -416,7 +416,7 @@ class Notebook(Loggable):
         zf.close()
 
         if run_tests:
-            print("Running your submission against local test cases...\n")
+            print("Running your submission against public test cases...\n")
             results = grade_zip_file(zip_path, nb_path, self._path)
             print(
                 "Your submission received the following results when run against " + \

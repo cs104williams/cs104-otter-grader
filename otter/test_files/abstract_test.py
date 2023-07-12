@@ -232,30 +232,30 @@ class TestFile(ABC):
     
     def summary(self, public_only=False):
         if (not public_only and self.passed_all) or (public_only and self.passed_all_public):
-            ret = f"{self.name} results:\n    ✅ All test cases passed!"
+            ret = f"{self.name} results:  ✅ All test cases passed!"
             return ret
+        else:
+            tcrs = self.test_case_results
+            if public_only:
+                tcrs = [tcr for tcr in tcrs if not tcr.test_case.hidden]
 
-        tcrs = self.test_case_results
-        if public_only:
-            tcrs = [tcr for tcr in tcrs if not tcr.test_case.hidden]
+            tcr_summaries = []
+            for tcr in tcrs:
+                if not tcr.passed:
+                    if tcr.test_case.failure_message is not None:
+                        smry = f'❌ {tcr.test_case.name} {tcr.test_case.failure_message}'
+                    else:
+                        message = tcr.message
+                        if "\nGot:\n" in message:
+                            output_index = message.index("\nGot:\n")
+                            message = message[(output_index + len("\nGot:\n")):]
+                        elif "\nException raised:\n" in message:
+                            output_index = message.index("\nException raised:\n")
+                            message = message.strip().split('\n')[-1]
+                        smry = f"❌ {tcr.test_case.name} {tcr.test_case.default_message()}\n{indent_wrap(message)}"
+                    tcr_summaries.append(smry.strip())
 
-        tcr_summaries = []
-        for tcr in tcrs:
-            if not tcr.passed:
-                if tcr.test_case.failure_message is not None:
-                    smry = f'❌ {tcr.test_case.name} {tcr.test_case.failure_message}'
-                else:
-                    message = tcr.message
-                    if "\nGot:\n" in message:
-                        output_index = message.index("\nGot:\n")
-                        message = message[(output_index + len("\nGot:\n")):]
-                    elif "\nException raised:\n" in message:
-                        output_index = message.index("\nException raised:\n")
-                        message = message.strip().split('\n')[-1]
-                    smry = f"❌ {tcr.test_case.name} {tcr.test_case.default_message()}\n{indent_wrap(message)}"
-                tcr_summaries.append(smry.strip())
-
-        return f"{self.name} results:\n" + indent("\n\n".join(tcr_summaries), "    ")
+            return f"{self.name} results:\n" + indent("\n\n".join(tcr_summaries), "    ")
 
     @classmethod
     @abstractmethod
