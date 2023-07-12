@@ -10,12 +10,9 @@ jupytext
 click
 fica>=0.2.0
 ipython
-<<<<<<< HEAD
 ipylab
 
 # plugins
 google-api-python-client
 google-auth-oauthlib
 six
-=======
->>>>>>> upstream/master
