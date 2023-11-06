@@ -99,7 +99,7 @@ class TestFile(ABC):
                         message = message[(output_index + len("\nGot:\n")):]
                     elif "\nException raised:\n" in message:
                         output_index = message.index("\nException raised:\n")
-                        message = message.strip().split('\n')[-1]
+                        message = 'Exception raised: ' + message.strip().split('\n')[-1]
                     ret += f'<li style="{li_style}">❌ <samp>{tcr.test_case.name} {tcr.test_case.default_message()}<samp><pre style="color:#a03196;">{indent_wrap(message)}</pre></li>\n'
         if self.has_hidden:
             ret += f'<li style="{li_style}">🙀 <samp>This part has hidden tests -- check you answers carefully!</samp></li>'
@@ -123,7 +123,7 @@ class TestFile(ABC):
                         message = message[(output_index + len("\nGot:\n")):]
                     elif "\nException raised:\n" in message:
                         output_index = message.index("\nException raised:\n")
-                        message = message.strip().split('\n')[-1]
+                        message = 'Exception raised: ' + message.strip().split('\n')[-1]
                     ret += f"\n❌ {tcr.test_case.name} {tcr.test_case.default_message()}{indent_wrap(message.strip())}\n"
         return ret
 
@@ -253,7 +253,7 @@ class TestFile(ABC):
                             message = message[(output_index + len("\nGot:\n")):]
                         elif "\nException raised:\n" in message:
                             output_index = message.index("\nException raised:\n")
-                            message = message.strip().split('\n')[-1]
+                            message = 'Exception raised: ' + message.strip().split('\n')[-1]
                         smry = f"❌ {tcr.test_case.name} {tcr.test_case.default_message()}\n{indent_wrap(message)}"
                     tcr_summaries.append(smry.strip())
 
