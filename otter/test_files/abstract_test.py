@@ -34,7 +34,9 @@ class TestCase:
     failure_message: Optional[str]
 
     def default_message(self):
-        text = self.body.split(">>> ")[-1]
+        text = self.body.split(">>> ")[-1].strip()
+        if text.startswith('check_str('):
+            text = text[len("check_str('"):-len("', locals())")]
         return text
 
 
@@ -88,7 +90,7 @@ class TestFile(ABC):
                 else:
                     ret += f'<li style="{li_style}">✅ <samp>{tcr.test_case.name} {tcr.test_case.default_message()}</samp></li>'
             else:
-                if tcr.test_case.failure_message is not None:
+                if tcr.test_case.failure_message is not None and tcr.test_case.failure_message != tcr.test_case.success_message:
                     ret += f'<li style="{li_style}">❌ <samp>{tcr.test_case.name} {tcr.test_case.failure_message}</samp></li>'
                 else:
                     message = tcr.message
@@ -112,7 +114,7 @@ class TestFile(ABC):
                 else:
                     ret += f"✅ {tcr.test_case.name} {tcr.test_case.default_message()}\n"
             else:
-                if tcr.test_case.failure_message is not None:
+                if tcr.test_case.failure_message is not None and tcr.test_case.failure_message != tcr.test_case.success_message:
                     ret += f"\n❌ {tcr.test_case.name} {tcr.test_case.failure_message.strip()}\n"
                 else:
                     message = tcr.message
@@ -242,7 +244,7 @@ class TestFile(ABC):
             tcr_summaries = []
             for tcr in tcrs:
                 if not tcr.passed:
-                    if tcr.test_case.failure_message is not None:
+                    if tcr.test_case.failure_message is not None and tcr.test_case.failure_message != tcr.test_case.success_message:
                         smry = f'❌ {tcr.test_case.name} {tcr.test_case.failure_message}'
                     else:
                         message = tcr.message
