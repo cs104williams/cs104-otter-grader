@@ -100,7 +100,10 @@ class TestFile(ABC):
                     elif "\nException raised:\n" in message:
                         output_index = message.index("\nException raised:\n")
                         message = message.strip().split('\n')[-1]
-                    ret += f'<li style="{li_style}">❌ <samp>{tcr.test_case.name} {tcr.test_case.default_message()}<samp><pre style="color:#a03196;">{indent_wrap(message)}</pre></li>\n'
+                    test_message = tcr.test_case.failure_message
+                    if test_message == None:
+                        test_message = tcr.test_case.default_message()
+                    ret += f'<li style="{li_style}">❌ <samp>{tcr.test_case.name} {test_message}<samp><pre style="color:#a03196;">{indent_wrap(message)}</pre></li>\n'
         if self.has_hidden:
             ret += f'<li style="{li_style}">🙀 <samp>This part has hidden tests -- check you answers carefully!</samp></li>'
         return ret + "</ul></font></strong>"
@@ -124,7 +127,12 @@ class TestFile(ABC):
                     elif "\nException raised:\n" in message:
                         output_index = message.index("\nException raised:\n")
                         message = message.strip().split('\n')[-1]
-                    ret += f"\n❌ {tcr.test_case.name} {tcr.test_case.default_message()}{indent_wrap(message.strip())}\n"
+
+                    test_message = tcr.test_case.failure_message
+                    if test_message == None:
+                        test_message = tcr.test_case.default_message()
+
+                    ret += f"\n❌ {tcr.test_case.name} {test_message}{indent_wrap(message.strip())}\n"
         return ret
 
     # @abstractmethod
@@ -254,7 +262,12 @@ class TestFile(ABC):
                         elif "\nException raised:\n" in message:
                             output_index = message.index("\nException raised:\n")
                             message = message.strip().split('\n')[-1]
-                        smry = f"❌ {tcr.test_case.name} {tcr.test_case.default_message()}\n{indent_wrap(message)}"
+
+                        test_message = tcr.test_case.failure_message
+                        if test_message == None:
+                            test_message = tcr.test_case.default_message()
+
+                        smry = f"❌ {tcr.test_case.name} {test_message}\n{indent_wrap(message)}"
                     tcr_summaries.append(smry.strip())
 
             return f"{self.name} results:\n" + indent("\n\n".join(tcr_summaries), "    ")
