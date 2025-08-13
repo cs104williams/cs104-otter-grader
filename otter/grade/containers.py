@@ -4,7 +4,9 @@ import glob
 import os
 import pandas as pd
 import pickle
-import pkg_resources
+
+# import pkg_resources
+from importlib.resources import files
 import shutil
 import tempfile
 import zipfile
@@ -35,30 +37,44 @@ def build_image(zip_path, base_image, tag):
         ``str``: the tag of the newly-build Docker image
     """
     image = OTTER_DOCKER_IMAGE_TAG + ":" + tag
-    dockerfile = pkg_resources.resource_filename(__name__, "Dockerfile")
+    dockerfile = str(files(__package__) / "Dockerfile")
 
     if not docker.image.exists(image):
         LOGGER.info(f"Building new image using {base_image} as base image")
 
         tmp_dir = tempfile.mkdtemp()
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        with zipfile.ZipFile(zip_path, "r") as zip_ref:
             zip_ref.extractall(tmp_dir)
 
-        docker.build(tmp_dir, build_args={
-            "BASE_IMAGE": base_image
-        }, tags=[image], file=dockerfile, load=True)
+        docker.build(
+            tmp_dir,
+            build_args={"BASE_IMAGE": base_image},
+            tags=[image],
+            file=dockerfile,
+            load=True,
+        )
         shutil.rmtree(tmp_dir)
     return image
 
 
-def launch_grade(zip_path, submissions_dir, num_containers=None, ext="ipynb", no_kill=False, 
-                 output_path="./", zips=False, image="ucbdsinfra/otter-grader", pdfs=False, 
-                 timeout=None, network=True):
+def launch_grade(
+    zip_path,
+    submissions_dir,
+    num_containers=None,
+    ext="ipynb",
+    no_kill=False,
+    output_path="./",
+    zips=False,
+    image="ucbdsinfra/otter-grader",
+    pdfs=False,
+    timeout=None,
+    network=True,
+):
     """
     Grades notebooks in parallel Docker containers
 
     This function runs ``num_containers`` Docker containers in parallel to grade the student submissions
-    in ``submissions_dir`` using the autograder configuration file at ``zip_path``. It can additionally 
+    in ``submissions_dir`` using the autograder configuration file at ``zip_path``. It can additionally
     generate PDFs for the parts of the assignment needing manual grading.
 
     Args:
@@ -115,8 +131,15 @@ def launch_grade(zip_path, submissions_dir, num_containers=None, ext="ipynb", no
     return [df.result() for df in finished_futures[0]]
 
 
-def grade_assignments(submission_path, image, no_kill=False, pdf_dir=None, pdfs=False, 
-                      timeout: Optional[int] = None, network=True):
+def grade_assignments(
+    submission_path,
+    image,
+    no_kill=False,
+    pdf_dir=None,
+    pdfs=False,
+    timeout: Optional[int] = None,
+    network=True,
+):
     """
     Grades multiple submissions in a directory using a single docker container. If no PDF assignment is
     wanted, set all three PDF params (``unfiltered_pdfs``, ``tag_filter``, and ``html_filter``) to ``False``.
@@ -148,7 +171,7 @@ def grade_assignments(submission_path, image, no_kill=False, pdf_dir=None, pdfs=
 
         volumes = [
             (temp_subm_path, f"/autograder/submission/{nb_basename}"),
-            (results_path, "/autograder/results/results.pkl")
+            (results_path, "/autograder/results/results.pkl"),
         ]
         if pdfs:
             volumes.append((pdf_path, f"/autograder/submission/{nb_name}.pdf"))
@@ -156,9 +179,11 @@ def grade_assignments(submission_path, image, no_kill=False, pdf_dir=None, pdfs=
         args = {}
 
         if network is not None and not network:
-            args['networks'] = 'none'
+            args["networks"] = "none"
 
-        container = docker.container.create(image, command=["/autograder/run_autograder"], **args)
+        container = docker.container.create(
+            image, command=["/autograder/run_autograder"], **args
+        )
 
         for local_path, container_path in volumes:
             docker.container.copy(local_path, (container, container_path))
@@ -199,7 +224,9 @@ def grade_assignments(submission_path, image, no_kill=False, pdf_dir=None, pdfs=
             container.remove()
 
         if exit != 0:
-            raise Exception(f"Executing '{submission_path}' in docker container failed! Exit code: {exit}")
+            raise Exception(
+                f"Executing '{submission_path}' in docker container failed! Exit code: {exit}"
+            )
 
         with open(results_path, "rb") as f:
             scores = pickle.load(f)
@@ -207,7 +234,14 @@ def grade_assignments(submission_path, image, no_kill=False, pdf_dir=None, pdfs=
         scores_dict = scores.to_dict()
         scores_dict["percent_correct"] = scores.total / scores.possible
 
-        scores_dict = {t: [scores_dict[t]["score"]] if type(scores_dict[t]) == dict else scores_dict[t] for t in scores_dict}
+        scores_dict = {
+            t: (
+                [scores_dict[t]["score"]]
+                if type(scores_dict[t]) == dict
+                else scores_dict[t]
+            )
+            for t in scores_dict
+        }
         scores_dict["file"] = os.path.split(submission_path)[1]
         df = pd.DataFrame(scores_dict)
 
