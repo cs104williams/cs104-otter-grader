@@ -5,6 +5,7 @@ channels:
 dependencies:
     - python={{ python_version }}
     - pip
+    - jupyter_server    
     - nb_conda_kernels
     - pip:
         - -r requirements.txt{% else %}{{ other_environment }}{% endif %}
