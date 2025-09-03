@@ -7,5 +7,6 @@ dependencies:
     - pip
     - jupyter_server    
     - nb_conda_kernels
+    - jupyter_server    
     - pip:
         - -r requirements.txt{% else %}{{ other_environment }}{% endif %}

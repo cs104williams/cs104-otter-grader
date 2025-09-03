@@ -3,7 +3,9 @@
 import json
 import os
 import pathlib
-import pkg_resources
+
+# import pkg_resources
+from importlib.resources import files
 import re
 import yaml
 import zipfile
@@ -20,10 +22,14 @@ from ..utils import load_default_file
 
 
 DEFAULT_PYTHON_VERSION = "3.7"
-MINICONDA_INSTALL_URL = "https://repo.anaconda.com/miniconda/Miniconda3-py38_4.10.3-Linux-x86_64.sh"
+MINICONDA_INSTALL_URL = (
+    "https://repo.anaconda.com/miniconda/Miniconda3-py38_4.10.3-Linux-x86_64.sh"
+)
 OTTER_ENV_NAME = "otter-env"
 OTTR_BRANCH = "v1.2.0"  # this should match a release tag on GitHub
-TEMPLATE_DIR = pkg_resources.resource_filename(__name__, "templates")
+
+TEMPLATE_DIR = str(files(__package__) / "templates")
+# TEMPLATE_DIR = pkg_resources.resource_filename(__name__, "templates")
 
 
 LANGUAGE_BASED_CONFIGURATIONS = {
@@ -40,10 +46,26 @@ LANGUAGE_BASED_CONFIGURATIONS = {
 }
 
 
-def main(*, tests_dir="./tests", output_path="autograder.zip", config=None, no_config=False, 
-         lang=None, requirements=None, no_requirements=False, overwrite_requirements=False, 
-         environment=None, no_environment=False, username=None, password=None, token=None, files=[], 
-         assignment=None, plugin_collection=None, python_version=None):
+def main(
+    *,
+    tests_dir="./tests",
+    output_path="autograder.zip",
+    config=None,
+    no_config=False,
+    lang=None,
+    requirements=None,
+    no_requirements=False,
+    overwrite_requirements=False,
+    environment=None,
+    no_environment=False,
+    username=None,
+    password=None,
+    token=None,
+    files=[],
+    assignment=None,
+    plugin_collection=None,
+    python_version=None,
+):
     """
     Runs Otter Generate
 
@@ -58,7 +80,7 @@ def main(*, tests_dir="./tests", output_path="autograder.zip", config=None, no_c
         overwrite_requirements (``bool``): whether to overwrite the default requirements instead of
             adding to them
         environment (``str``): path to a conda environment file for this assignment
-        no_environment (``bool``): whether ``./environment.yml`` should be automatically checked if 
+        no_environment (``bool``): whether ``./environment.yml`` should be automatically checked if
             ``environment`` is unspecified
         username (``str``): a username for Gradescope for generating a token
         password (``str``): a password for Gradescope for generating a token
@@ -94,7 +116,11 @@ def main(*, tests_dir="./tests", output_path="autograder.zip", config=None, no_c
     if "token" not in otter_config and token is not None:
         otter_config["token"] = token
 
-    elif "token" not in otter_config and "course_id" in otter_config and "assignment_id" in otter_config:
+    elif (
+        "token" not in otter_config
+        and "course_id" in otter_config
+        and "assignment_id" in otter_config
+    ):
         client = APIClient()
         if username is not None and password is not None:
             client.log_in(username, password)
@@ -104,7 +130,9 @@ def main(*, tests_dir="./tests", output_path="autograder.zip", config=None, no_c
         otter_config["token"] = token
 
     elif ("course_id" in otter_config) ^ ("assignment_id" in otter_config):
-        raise ValueError(f"Otter config contains 'course_id' or 'assignment_id' but not both")
+        raise ValueError(
+            f"Otter config contains 'course_id' or 'assignment_id' but not both"
+        )
 
     ag_config = AutograderConfig(otter_config)
 
@@ -123,7 +151,7 @@ def main(*, tests_dir="./tests", output_path="autograder.zip", config=None, no_c
     templates = {}
     for fn in os.listdir(template_dir):
         fp = os.path.join(template_dir, fn)
-        if os.path.isfile(fp): # prevents issue w/ finding __pycache__ in template dirs
+        if os.path.isfile(fp):  # prevents issue w/ finding __pycache__ in template dirs
             with open(fp) as f:
                 templates[fn] = Template(f.read())
 
@@ -152,20 +180,27 @@ def main(*, tests_dir="./tests", output_path="autograder.zip", config=None, no_c
     plugin_collection.run("during_generate", otter_config, assignment)
 
     # open requirements if it exists
-    with load_default_file(requirements, lang_config["requirements_filename"], 
-                           default_disabled=no_requirements,) as reqs:
+    with load_default_file(
+        requirements,
+        lang_config["requirements_filename"],
+        default_disabled=no_requirements,
+    ) as reqs:
         template_context["other_requirements"] = reqs if reqs is not None else ""
 
     template_context["overwrite_requirements"] = overwrite_requirements
 
     # open environment if it exists
     # unlike requirements.txt, we will always overwrite, not append by default
-    with load_default_file(environment, "environment.yml", default_disabled=no_environment) as env_contents:
+    with load_default_file(
+        environment, "environment.yml", default_disabled=no_environment
+    ) as env_contents:
         template_context["other_environment"] = env_contents
         if env_contents is not None:
             data = yaml.safe_load(env_contents)
-            data['name'] = template_context["otter_env_name"]
-            template_context["other_environment"] = yaml.safe_dump(data, default_flow_style=False)
+            data["name"] = template_context["otter_env_name"]
+            template_context["other_environment"] = yaml.safe_dump(
+                data, default_flow_style=False
+            )
 
     rendered = {}
     for fn, template in templates.items():
@@ -192,11 +227,17 @@ def main(*, tests_dir="./tests", output_path="autograder.zip", config=None, no_c
                 if os.getcwd() not in full_fp:
                     raise ValueError(f"{file} is not in the working directory")
 
-                relative_fp = pathlib.Path(full_fp).relative_to(pathlib.Path(os.getcwd()))
+                relative_fp = pathlib.Path(full_fp).relative_to(
+                    pathlib.Path(os.getcwd())
+                )
                 if os.path.isfile(full_fp):
                     zf.write(file, arcname=os.path.join("files", relative_fp))
                 elif os.path.isdir(full_fp):
-                    zip_folder(zf, full_fp, prefix=os.path.join("files", os.path.split(relative_fp)[0]))
+                    zip_folder(
+                        zf,
+                        full_fp,
+                        prefix=os.path.join("files", os.path.split(relative_fp)[0]),
+                    )
                 else:
                     raise ValueError(f"Could not find file or directory '{full_fp}'")
 
