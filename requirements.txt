@@ -6,7 +6,6 @@ PyYAML
 python-on-whales
 requests
 wrapt
-jupytext
 click
 fica>=0.2.0
 ipython

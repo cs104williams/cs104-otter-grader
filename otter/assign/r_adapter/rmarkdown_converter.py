@@ -1,6 +1,5 @@
 """Functions for converting Assign-formatted R Markdown files to and from notebook objects"""
 
-import jupytext
 import os
 import re
 
@@ -88,6 +87,7 @@ def read_as_notebook(rmd_path):
     if in_comment:
         raise ValueError("R Markdown file ends with an unclosed HTML comment")
 
+    import jupytext  # optional dependency; only needed for R Markdown assignments
     nb = jupytext.reads("\n".join(new_lines), "Rmd", as_version=NBFORMAT_VERSION)
     nb["metadata"]["kernelspec"] = {"language": "r"}
 
@@ -124,4 +124,5 @@ def write_as_rmd(nb, rmd_path, has_solutions):
         source.insert(-1, f"assignment_name: \"{assignment_name}\"")
         config_cell["source"] = "\n".join(source)
 
+    import jupytext  # optional dependency; only needed for R Markdown assignments
     jupytext.write(nb, rmd_path)
